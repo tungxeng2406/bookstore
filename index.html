@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nhà sách trực tuyến</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f4;
+      color: #333;
+      transition: 0.3s;
+    }
+    .dark-mode {
+      background: #121212;
+      color: #eee;
+    }
+    header {
+      background: #4CAF50;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    .container {
+      display: flex;
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 220px;
+      background: #333;
+      color: white;
+      padding: 20px;
+    }
+    .sidebar h3 { margin-top: 0; }
+    .sidebar ul { list-style: none; padding-left: 0; }
+    .sidebar li {
+      padding: 10px;
+      background: #444;
+      margin-bottom: 10px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .sidebar li:hover {
+      background: #555;
+    }
+    .toggle-theme {
+      display: block;
+      margin: 20px auto;
+      background: #111;
+      color: #fff;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .dark-mode .toggle-theme {
+      background: #eee;
+      color: #111;
+    }
+    .main {
+      flex-grow: 1;
+      padding: 20px;
+    }
+    h2 { margin-top: 0; }
+    .book-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+    .book {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      transition: 0.3s;
+    }
+    .dark-mode .book {
+      background: #1e1e1e;
+    }
+    .book img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+    }
+    .book-details {
+      padding: 10px;
+    }
+    .book h4 { margin: 0 0 5px; }
+    .price {
+      color: #e91e63;
+      font-weight: bold;
+    }
+    .add-btn {
+      margin-top: 10px;
+      padding: 8px 12px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .add-btn:hover {
+      background: #388e3c;
+    }
+    .cart {
+      margin-top: 30px;
+      padding: 15px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .dark-mode .cart {
+      background: #1e1e1e;
+    }
+    .cart-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .cart-item img {
+      width: 50px;
+      height: 70px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+    .cart-summary {
+      font-weight: bold;
+      margin-top: 15px;
+    }
+    .checkout-btn {
+      margin-top: 10px;
+      padding: 10px;
+      background: #e91e63;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .checkout-btn:hover {
+      background: #c2185b;
+    }
+    @media (max-width: 768px) {
+      .container { flex-direction: column; }
+      .sidebar { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>📚 Nhà sách trực tuyến</h1>
+  <p>Chọn sách yêu thích và thanh toán dễ dàng</p>
+</header>
+
+<div class="container">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h3>📂 Danh mục</h3>
+    <ul>
+      <li onclick="showBooks('kinhdoanh')">Sách Kinh doanh</li>
+      <li onclick="showBooks('kynang')">Sách Kỹ năng</li>
+      <li onclick="showBooks('vanhoc')">Sách Văn học</li>
+      <li onclick="showBooks('thieunhi')">Sách Thiếu nhi</li>
+    </ul>
+    <button class="toggle-theme" onclick="toggleTheme()">🌗 Đổi giao diện</button>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <h2 id="category-title">Chọn thể loại để hiển thị sách</h2>
+    <div id="book-container" class="book-list"></div>
+
+    <div class="cart" id="cart">
+      <h3>🛒 Giỏ hàng</h3>
+      <div id="cart-items"></div>
+      <div class="cart-summary" id="cart-summary">Tổng: 0₫</div>
+      <button class="checkout-btn" onclick="checkout()">Thanh toán</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const data = {
+    kinhdoanh: Array.from({ length: 10 }, (_, i) => ({
+      title: `Kinh doanh ${i + 1}`,
+      desc: `Mô tả sách kinh doanh số ${i + 1}`,
+      price: 100000 + i * 5000,
+      img: `https://via.placeholder.com/200x250.png?text=KD${i + 1}`
+    })),
+    kynang: Array.from({ length: 10 }, (_, i) => ({
+      title: `Kỹ năng ${i + 1}`,
+      desc: `Mô tả sách kỹ năng số ${i + 1}`,
+      price: 90000 + i * 4000,
+      img: `https://via.placeholder.com/200x250.png?text=KN${i + 1}`
+    })),
+    vanhoc: Array.from({ length: 10 }, (_, i) => ({
+      title: `Văn học ${i + 1}`,
+      desc: `Mô tả sách văn học số ${i + 1}`,
+      price: 85000 + i * 3000,
+      img: `https://via.placeholder.com/200x250.png?text=VH${i + 1}`
+    })),
+    thieunhi: Array.from({ length: 10 }, (_, i) => ({
+      title: `Thiếu nhi ${i + 1}`,
+      desc: `Mô tả sách thiếu nhi số ${i + 1}`,
+      price: 70000 + i * 2000,
+      img: `https://via.placeholder.com/200x250.png?text=TN${i + 1}`
+    }))
+  };
+
+  const cart = [];
+
+  function showBooks(type) {
+    const container = document.getElementById('book-container');
+    const title = document.getElementById('category-title');
+    title.textContent = `Thể loại: ${type.toUpperCase()}`;
+    container.innerHTML = '';
+
+    data[type].forEach((book, index) => {
+      const div = document.createElement('div');
+      div.className = 'book';
+      div.innerHTML = `
+        <img src="${book.img}" alt="${book.title}">
+        <div class="book-details">
+          <h4>${book.title}</h4>
+          <p>${book.desc}</p>
+          <p class="price">${book.price.toLocaleString()}₫</p>
+          <button class="add-btn" onclick="addToCart(${book.price}, '${book.title}', '${book.img}')">Thêm vào giỏ</button>
+        </div>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function addToCart(price, title, img) {
+    cart.push({ price, title, img });
+    updateCart();
+  }
+
+  function updateCart() {
+    const items = document.getElementById('cart-items');
+    const summary = document.getElementById('cart-summary');
+    items.innerHTML = '';
+    let total = 0;
+    cart.forEach(item => {
+      total += item.price;
+      const div = document.createElement('div');
+      div.className = 'cart-item';
+      div.innerHTML = `
+        <img src="${item.img}" alt="${item.title}">
+        <div>
+          <p><strong>${item.title}</strong></p>
+          <p>${item.price.toLocaleString()}₫</p>
+        </div>
+      `;
+      items.appendChild(div);
+    });
+    summary.textContent = `Tổng: ${total.toLocaleString()}₫`;
+  }
+
+  function checkout() {
+    if (cart.length === 0) {
+      alert("Giỏ hàng của bạn đang trống.");
+    } else {
+      alert("Cảm ơn bạn đã mua hàng! Tổng thanh toán: " + cart.reduce((sum, item) => sum + item.price, 0).toLocaleString() + "₫");
+      cart.length = 0;
+      updateCart();
+    }
+  }
+
+  function toggleTheme() {
+    document.body.classList.toggle('dark-mode');
+  }
+</script>
+</body>
+</html>
